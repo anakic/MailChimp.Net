@@ -178,6 +178,12 @@ internal class ReportLogic : BaseLogic, IReportLogic
         return campaignOpenReport.Members;
     }
 
+    public IEnumerable<Open> GetCampaignOpenReport(string campaignId, QueryableBaseRequest request = null)
+    {
+        var campaignOpenReport = GetCampaignOpenReportResponse(campaignId, request);
+        return campaignOpenReport.Members;
+    }
+
     /// <summary>
     /// The get campaign open report async.
     /// </summary>
@@ -227,6 +233,21 @@ internal class ReportLogic : BaseLogic, IReportLogic
         var response = await client.GetAsync($"{campaignId}/open-details{request.ToQueryString()}", cancellationToken).ConfigureAwait(false);
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
         var reportResponse = await response.Content.ReadAsAsync<CampaignOpenReportResponse>().ConfigureAwait(false);
+        return reportResponse;
+    }
+    private CampaignOpenReportResponse GetCampaignOpenReportResponse(
+        string campaignId,
+        QueryableBaseRequest request = null)
+    {
+        request ??= new QueryableBaseRequest
+        {
+            Limit = _limit
+        };
+
+        using var client = CreateMailClient("reports/");
+        var response = client.Get($"{campaignId}/open-details{request.ToQueryString()}");
+        response.EnsureSuccessMailChimp();
+        var reportResponse = response.Content.ReadAs<CampaignOpenReportResponse>();
         return reportResponse;
     }
 
@@ -655,6 +676,14 @@ internal class ReportLogic : BaseLogic, IReportLogic
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
 
         return await response.Content.ReadAsAsync<Report>().ConfigureAwait(false);
+    }
+
+    public Report GetReport(string campaignId, BaseRequest request = null)
+    {
+        using var client = CreateMailClient("reports/");
+        var response = client.Get(campaignId + request?.ToQueryString());
+        response.EnsureSuccessMailChimp();
+        return response.Content.ReadAs<Report>();
     }
 
     /// <summary>

@@ -48,6 +48,22 @@ public static class Helper
         }
     }
 
+    public static void EnsureSuccessMailChimp(this HttpResponseMessage response)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var responseContentStream = response.Content.ReadAsStreamAsync().Result;
+            var error = responseContentStream.Deserialize<MailChimpApiError>();
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new MailChimpNotFoundException($"Unable to find the resource at {response.RequestMessage.RequestUri}", error, response);
+            }
+
+            throw new MailChimpException(error, response);
+        }
+    }
+
     /// <summary>
     /// The get md 5 hash.
     /// </summary>

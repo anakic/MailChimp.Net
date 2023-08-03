@@ -72,6 +72,9 @@ public class MailChimpHttpClient : IDisposable
     public Task<HttpResponseMessage> GetAsync(string requestUri, CancellationToken cancellationToken) 
         => SendAsync(HttpMethod.Get, requestUri, contentOrNull: null, cancellationToken);
 
+    public HttpResponseMessage Get(string requestUri)
+        => Send(HttpMethod.Get, requestUri, contentOrNull: null);
+
     /// <summary>
     /// Post request
     /// </summary> 
@@ -156,6 +159,21 @@ public class MailChimpHttpClient : IDisposable
             request.Content = contentOrNull;
         }
         return _httpClient.SendAsync(request, cancellationToken);
+    }
+
+    private HttpResponseMessage Send(HttpMethod method, string requestUri, HttpContent contentOrNull)
+    {
+        var request = new HttpRequestMessage(method, _resource + requestUri);
+        if (method.Method == "PATCH")
+        {
+            request.Headers.ExpectContinue = false;
+        }
+        request.Headers.Add("Authorization", _options.AuthHeader);
+        if (contentOrNull != null)
+        {
+            request.Content = contentOrNull;
+        }
+        return _httpClient.SendAsync(request).Result;
     }
 
 }

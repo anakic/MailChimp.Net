@@ -44,8 +44,13 @@ public interface ICampaignLogic
     /// The <see cref="Task"/>.
     /// </returns>
     Task<Campaign> AddOrUpdateAsync(Campaign campaign, CancellationToken cancellationToken = default);
+
     Task<Campaign> AddAsync(Campaign campaign, CancellationToken cancellationToken = default);
+    Campaign Add(Campaign campaign);
+
     Task<Campaign> UpdateAsync(string campaignId, Campaign campaign, CancellationToken cancellationToken = default);
+    Campaign Update(string campaignId, Campaign campaign);
+
     Task<ReplicateResponse> ReplicateCampaignAsync(string campaignId, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -69,17 +74,7 @@ public interface ICampaignLogic
     /// The <see cref="Task"/>.
     /// </returns>
     Task DeleteAsync(string campaignId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// The get all.
-    /// </summary>
-    /// <param name="request">
-    /// The request.
-    /// </param>
-    /// <returns>
-    /// The <see cref="Task"/>.
-    /// </returns>
-    Task<IEnumerable<Campaign>> GetAll(CampaignRequest request = null, CancellationToken cancellationToken = default);
+    void Delete(string campaignId);
 
     /// <summary>
     /// The get async.
@@ -102,6 +97,7 @@ public interface ICampaignLogic
     /// The <see cref="Task"/>.
     /// </returns>
     Task SendAsync(string campaignId, CancellationToken cancellationToken = default);
+
 
     /// <summary>
     /// Executes a given action on the specified campaign.
@@ -169,6 +165,8 @@ public interface ICampaignLogic
     /// <exception cref="NotSupportedException"><paramref name="element" /> is not a constructor, method, property, event, type, or field. </exception>
     /// <exception cref="TypeLoadException">A custom attribute type cannot be loaded. </exception>
     Task<IEnumerable<Campaign>> GetAllAsync(CampaignRequest request = null, CancellationToken cancellationToken = default);
+
+    IEnumerable<Campaign> GetAll(CampaignRequest request = null);
 
     /// <summary>
     /// The get all.

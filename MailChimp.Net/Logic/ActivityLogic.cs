@@ -45,6 +45,9 @@ public class ActivityLogic : BaseLogic, IActivityLogic
     public async Task<IEnumerable<Activity>> GetAllAsync(string listId, BaseRequest request = null, CancellationToken cancellationToken = default) 
         => (await GetResponseAsync(listId, request, cancellationToken).ConfigureAwait(false))?.Activities;
 
+    public IEnumerable<Activity> GetAll(string listId, BaseRequest request = null)
+        => GetResponse(listId, request)?.Activities;
+
     /// <summary>
     /// The get all async.
     /// </summary>
@@ -70,6 +73,16 @@ public class ActivityLogic : BaseLogic, IActivityLogic
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
 
         var appResponse = await response.Content.ReadAsAsync<ActivityResponse>().ConfigureAwait(false);
+        return appResponse;
+    }
+
+    public ActivityResponse GetResponse(string listId, BaseRequest request = null)
+    {
+        using var client = CreateMailClient("lists/");
+        var response = client.Get($"{listId}/activity{request?.ToQueryString()}");
+        response.EnsureSuccessMailChimp();
+
+        var appResponse = response.Content.ReadAs<ActivityResponse>();
         return appResponse;
     }
 

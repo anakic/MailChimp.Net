@@ -23,7 +23,6 @@ namespace MailChimp.Net.Logic;
 /// </summary>
 internal class CampaignLogic : BaseLogic, ICampaignLogic
 {
-
     public CampaignLogic(MailChimpOptions mailChimpConfiguration)
         : base(mailChimpConfiguration)
     {
@@ -65,6 +64,9 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
     public async Task<Campaign> AddAsync(Campaign campaign, CancellationToken cancellationToken = default) 
         => await CreateAsync(campaign, cancellationToken).ConfigureAwait(false);
 
+    public Campaign Add(Campaign campaign)
+        => Create(campaign);
+
     public async Task<Campaign> UpdateAsync(string campaignId, Campaign campaign, CancellationToken cancellationToken = default)
     {
         using var client = CreateMailClient("campaigns/");
@@ -72,6 +74,14 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
 
         return await response.Content.ReadAsAsync<Campaign>().ConfigureAwait(false);
+    }
+
+    public Campaign Update(string campaignId, Campaign campaign)
+    {
+        using var client = CreateMailClient("campaigns/");
+        var response = client.PatchAsJsonAsync($"{campaignId}", campaign, default).Result;
+        response.EnsureSuccessMailChimpAsync().Wait();
+        return response.Content.ReadAsAsync<Campaign>().Result;
     }
 
     /// <summary>
@@ -114,6 +124,13 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
         return await response.Content.ReadAsAsync<Campaign>().ConfigureAwait(false);
     }
 
+    private Campaign Create(Campaign campaign)
+    {
+        using var client = CreateMailClient("campaigns");
+        var response = client.PostAsJsonAsync("", campaign, default).Result;
+        response.EnsureSuccessMailChimpAsync().Wait();
+        return response.Content.ReadAsAsync<Campaign>().Result;
+    }
 
     private async Task<Campaign> CreateAsync(Campaign campaign, CancellationToken cancellationToken = default)
     {
@@ -177,29 +194,12 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// The get all.
-    /// </summary>
-    /// <param name="request">
-    /// The request.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// The <paramref>
-    ///         <name>requestUri</name>
-    ///     </paramref>
-    ///     was null.
-    /// </exception>
-    /// <returns>
-    /// The <see cref="Task"/>.
-    /// </returns>
-    /// <exception cref="UriFormatException">In the .NET for Windows Store apps or the Portable Class Library, catch the base class exception, <see cref="T:System.FormatException" />, instead.<paramref name="uriString" /> is empty.-or- The scheme specified in <paramref name="uriString" /> is not correctly formed. See <see cref="M:System.Uri.CheckSchemeName(System.String)" />.-or- <paramref name="uriString" /> contains too many slashes.-or- The password specified in <paramref name="uriString" /> is not valid.-or- The host name specified in <paramref name="uriString" /> is not valid.-or- The file name specified in <paramref name="uriString" /> is not valid. -or- The user name specified in <paramref name="uriString" /> is not valid.-or- The host or authority name specified in <paramref name="uriString" /> cannot be terminated by backslashes.-or- The port number specified in <paramref name="uriString" /> is not valid or cannot be parsed.-or- The length of <paramref name="uriString" /> exceeds 65519 characters.-or- The length of the scheme specified in <paramref name="uriString" /> exceeds 1023 characters.-or- There is an invalid character sequence in <paramref name="uriString" />.-or- The MS-DOS path specified in <paramref name="uriString" /> must start with c:\\.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Enlarging the value of this instance would exceed <see cref="P:System.Text.StringBuilder.MaxCapacity" />. </exception>
-    /// <exception cref="MailChimpException">
-    /// Custom Mail Chimp Exception
-    /// </exception>
-    /// <exception cref="NotSupportedException"><paramref name="element" /> is not a constructor, method, property, event, type, or field. </exception>
-    /// <exception cref="TypeLoadException">A custom attribute type cannot be loaded. </exception>
-    public async Task<IEnumerable<Campaign>> GetAll(CampaignRequest request = null, CancellationToken cancellationToken = default) => (await GetResponseAsync(request).ConfigureAwait(false))?.Campaigns;
+    public void Delete(string campaignId)
+    {
+        using var client = CreateMailClient("campaigns/");
+        var response = client.DeleteAsync($"{campaignId}", default).Result;
+        response.EnsureSuccessMailChimpAsync().Wait();
+    }
 
     /// <summary>
     /// The get all.
@@ -223,8 +223,11 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
     /// </exception>
     /// <exception cref="NotSupportedException"><paramref name="element" /> is not a constructor, method, property, event, type, or field. </exception>
     /// <exception cref="TypeLoadException">A custom attribute type cannot be loaded. </exception>
-    public async Task<IEnumerable<Campaign>> GetAllAsync(CampaignRequest request = null, CancellationToken cancellationToken = default) => (await GetResponseAsync(request).ConfigureAwait(false))?.Campaigns;
+    public async Task<IEnumerable<Campaign>> GetAllAsync(CampaignRequest request = null, CancellationToken cancellationToken = default) 
+        => (await GetResponseAsync(request).ConfigureAwait(false))?.Campaigns;
 
+    public IEnumerable<Campaign> GetAll(CampaignRequest request = null)
+        => GetResponse(request)?.Campaigns;
 
     /// <summary>
     /// The get all.
@@ -260,6 +263,21 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
 
         var campaignResponse = await response.Content.ReadAsAsync<CampaignResponse>().ConfigureAwait(false);
+        return campaignResponse;
+    }
+
+    public CampaignResponse GetResponse(CampaignRequest request = null)
+    {
+        request ??= new CampaignRequest
+        {
+            Limit = _limit
+        };
+
+        using var client = CreateMailClient("campaigns");
+        var response = client.Get(request.ToQueryString());
+        response.EnsureSuccessMailChimp();
+
+        var campaignResponse = response.Content.ReadAsAsync<CampaignResponse>().Result;
         return campaignResponse;
     }
 

@@ -10,9 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
-#if HTTP_CLIENT_FACTORY 
-using Microsoft.Extensions.DependencyInjection;
-#endif
+using MailChimp.Net.Models;
 
 #pragma warning disable 1584, 1711, 1572, 1581, 1580
 
@@ -26,37 +24,6 @@ public abstract class BaseLogic
     internal int _limit => _options.Limit;
 
     internal MailChimpOptions _options;
-
-#if HTTP_CLIENT_FACTORY
-    private static readonly ConcurrentDictionary<string, IHttpClientFactory> s_clientFactories = new();
-
-    private IHttpClientFactory GetHttpClientFactory()
-    {
-        // if factory already has the key then let it go
-        if(s_clientFactories.TryGetValue(this._options.ApiKey ?? "OAuthMode", out var returnValue))
-        {
-            return returnValue;
-        }
-
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddHttpClient(this._options.ApiKey ?? "OAuthMode", client =>
-        {
-            client.BaseAddress = new Uri(GetBaseAddress());               
-        })
-            .ConfigurePrimaryHttpMessageHandler(handler =>
-            new HttpClientHandler()
-            {
-                AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
-            });
-
-        var serviceProvider = serviceCollection.BuildServiceProvider();
-        var factory = serviceProvider.GetService<IHttpClientFactory>();
-        s_clientFactories.TryAdd(this._options.ApiKey ?? "OAuthMode", factory);
-        return factory;
-    }
-
-#endif
-
 
     protected BaseLogic(MailChimpOptions options)
     {
@@ -77,23 +44,15 @@ public abstract class BaseLogic
     ///     </paramref>
     ///     is null. </exception>
     /// <exception cref="UriFormatException">In the .NET for Windows Store apps or the Portable Class Library, catch the base class exception, <see cref="T:System.FormatException" />, instead.<paramref name="uriString" /> is empty.-or- The scheme specified in <paramref name="uriString" /> is not correctly formed. See <see cref="M:System.Uri.CheckSchemeName(System.String)" />.-or- <paramref name="uriString" /> contains too many slashes.-or- The password specified in <paramref name="uriString" /> is not valid.-or- The host name specified in <paramref name="uriString" /> is not valid.-or- The file name specified in <paramref name="uriString" /> is not valid. -or- The user name specified in <paramref name="uriString" /> is not valid.-or- The host or authority name specified in <paramref name="uriString" /> cannot be terminated by backslashes.-or- The port number specified in <paramref name="uriString" /> is not valid or cannot be parsed.-or- The length of <paramref name="uriString" /> exceeds 65519 characters.-or- The length of the scheme specified in <paramref name="uriString" /> exceeds 1023 characters.-or- There is an invalid character sequence in <paramref name="uriString" />.-or- The MS-DOS path specified in <paramref name="uriString" /> must start with c:\\.</exception>
-    protected MailChimpHttpClient CreateMailClient(string resource) =>
-#if HTTP_CLIENT_FACTORY
-        FactoryProvidedHttpClient(resource);
-#else
-        NewedUpHttpClient(resource);
-#endif
-
-
-
-#if HTTP_CLIENT_FACTORY
-    private MailChimpHttpClient FactoryProvidedHttpClient(string resource)
-    {           
-        var client = GetHttpClientFactory().CreateClient(_options.ApiKey ?? "OAuthMode");
+    protected MailChimpHttpClient CreateMailClient(string resource)
+    {
+        var client = new HttpClient(new HttpClientHandler()
+        {
+            AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate,
+        });
+        client.BaseAddress = new Uri(GetBaseAddress());
         return new MailChimpHttpClient(client, _options, resource);
     }
-#endif
-
 
     private MailChimpHttpClient NewedUpHttpClient(string resource)
     {           

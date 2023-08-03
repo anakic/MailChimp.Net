@@ -110,6 +110,9 @@ internal class ListLogic : BaseLogic, IListLogic
     public async Task<IEnumerable<List>> GetAllAsync(ListRequest request = null, CancellationToken cancellationToken = default) 
         => (await GetResponseAsync(request, cancellationToken).ConfigureAwait(false))?.Lists;
 
+    public IEnumerable<List> GetAll(ListRequest request = null)
+        => GetResponse(request)?.Lists;
+
     /// <summary>
     /// The get all async.
     /// </summary>
@@ -142,6 +145,21 @@ internal class ListLogic : BaseLogic, IListLogic
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
 
         var listResponse = await response.Content.ReadAsAsync<ListResponse>().ConfigureAwait(false);
+        return listResponse;
+    }
+
+    public ListResponse GetResponse(ListRequest request = null)
+    {
+        request ??= new ListRequest
+        {
+            Limit = _limit
+        };
+
+        using var client = CreateMailClient("lists");
+        var response = client.Get(request.ToQueryString());
+        response.EnsureSuccessMailChimp();
+
+        var listResponse = response.Content.ReadAs<ListResponse>();
         return listResponse;
     }
 

@@ -32,6 +32,8 @@ public interface IActivityLogic
     /// </returns>
     Task<IEnumerable<Activity>> GetAllAsync(string listId, BaseRequest request = null, CancellationToken cancellationToken = default);
 
+    IEnumerable<Activity> GetAll(string listId, BaseRequest request = null);
+
     /// <summary>
     /// The get all async.
     /// </summary>

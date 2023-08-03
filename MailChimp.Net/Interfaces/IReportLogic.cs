@@ -24,6 +24,7 @@ public interface IReportLogic
     Task<IEnumerable<Report>> GetAllReportsAsync(ReportRequest request = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<Advice>> GetCampaignAdviceAsync(string campaignId, BaseRequest request = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<Open>> GetCampaignOpenReportAsync(string campaignId, QueryableBaseRequest request = null, CancellationToken cancellationToken = default);
+    IEnumerable<Open> GetCampaignOpenReport(string campaignId, QueryableBaseRequest request = null);
     Task<int> GetCampaignOpenReportCountAsync(string campaignId, QueryableBaseRequest request = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<UrlClicked>> GetClickReportAsync(string campaignId, QueryableBaseRequest request = null, CancellationToken cancellationToken = default);
     Task<UrlClicked> GetClickReportDetailsAsync(string campaignId, string linkId, BaseRequest request = null, CancellationToken cancellationToken = default);
@@ -36,6 +37,7 @@ public interface IReportLogic
     Task<EmailActivity> GetEmailActivityAsync(string campaignId, string emailAddressOrHash, BaseRequest request = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<OpenLocation>> GetLocationsAsync(string campaignId, BaseRequest request = null, CancellationToken cancellationToken = default);
     Task<Report> GetReportAsync(string campaignId, BaseRequest request = null, CancellationToken cancellationToken = default);
+    Report GetReport(string campaignId, BaseRequest request = null);
     Task<ReportResponse> GetResponseAsync(ReportRequest request = null, CancellationToken cancellationToken = default);
     Task<SentTo> GetSentToRecipientAsync(string campaignId, string emailAddressOrHash, QueryableBaseRequest request = null, CancellationToken cancellationToken = default);
     Task<IEnumerable<SentTo>> GetSentToRecipientsAsync(string campaignId, QueryableBaseRequest request = null, CancellationToken cancellationToken = default);
