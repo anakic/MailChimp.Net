@@ -52,6 +52,8 @@ public interface IListLogic
     /// </returns>
     Task<IEnumerable<List>> GetAllAsync(ListRequest request = null, CancellationToken cancellationToken = default);
 
+    IEnumerable<List> GetAll(ListRequest request = null);
+
     /// <summary>
     /// The get async.
     /// </summary>

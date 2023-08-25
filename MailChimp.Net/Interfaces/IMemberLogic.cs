@@ -134,6 +134,7 @@ public interface IMemberLogic
     /// The <see cref="Task"/>.
     /// </returns>
     Task<IEnumerable<Member>> GetAllAsync(string listId, MemberRequest memberRequest = null, CancellationToken cancellationToken = default);
+    IEnumerable<Member> GetAll(string listId, MemberRequest memberRequest = null);
 
     /// <summary>
     /// Get the total number of members in the list

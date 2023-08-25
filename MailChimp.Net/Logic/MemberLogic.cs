@@ -330,6 +330,9 @@ internal class MemberLogic : BaseLogic, IMemberLogic
     public async Task<IEnumerable<Member>> GetAllAsync(string listId, MemberRequest memberRequest = null, CancellationToken cancellationToken = default) 
         => (await GetResponseAsync(listId, memberRequest, cancellationToken).ConfigureAwait(false))?.Members;
 
+    public IEnumerable<Member> GetAll(string listId, MemberRequest memberRequest = null)
+        => (GetResponse(listId, memberRequest))?.Members;
+
     /// <exception cref="ArgumentNullException"><paramref>
     ///         <name>uriString</name>
     ///     </paramref>
@@ -354,6 +357,21 @@ internal class MemberLogic : BaseLogic, IMemberLogic
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
 
         var listResponse = await response.Content.ReadAsAsync<MemberResponse>().ConfigureAwait(false);
+        return listResponse;
+    }
+
+    public MemberResponse GetResponse(string listId, MemberRequest memberRequest = null)
+    {
+        memberRequest ??= new MemberRequest
+        {
+            Limit = _limit
+        };
+
+        using var client = CreateMailClient($"{BaseUrl}/");
+        var response = client.Get($"{listId}/members{memberRequest.ToQueryString()}");
+        response.EnsureSuccessMailChimp();
+
+        var listResponse = response.Content.ReadAs<MemberResponse>();
         return listResponse;
     }
 

@@ -9,7 +9,6 @@ namespace MailChimp.Net.Logic;
 
 public class ListSegmentLogic : BaseLogic, IListSegmentLogic
 {
-
     private const string BaseUrl = "/lists/{0}/segments";
 
     public ListSegmentLogic(MailChimpOptions mailChimpConfiguration)
@@ -117,10 +116,26 @@ public class ListSegmentLogic : BaseLogic, IListSegmentLogic
         return memberResponse;
     }
 
-    public async Task<IEnumerable<Member>> GetAllMembersAsync(string listId, string segmentId, QueryableBaseRequest request = null, CancellationToken cancellationToken = default) => (await GetMemberResponseAsync(listId, segmentId, request).ConfigureAwait(false))?.Members;
+    public MemberResponse GetMemberResponse(string listId, string segmentId, QueryableBaseRequest request = null)
+    {
+        request ??= new QueryableBaseRequest
+        {
+            Limit = _limit
+        };
 
+        using var client = CreateMailClient(string.Format(BaseUrl + "/", listId));
+        var response = client.Get(segmentId + "/members" + request.ToQueryString());
+        response.EnsureSuccessMailChimp();
 
+        var memberResponse = response.Content.ReadAs<MemberResponse>();
+        return memberResponse;
+    }
 
+    public async Task<IEnumerable<Member>> GetAllMembersAsync(string listId, string segmentId, QueryableBaseRequest request = null, CancellationToken cancellationToken = default) 
+        => (await GetMemberResponseAsync(listId, segmentId, request).ConfigureAwait(false))?.Members;
+
+    public IEnumerable<Member> GetAllMembers(string listId, string segmentId, QueryableBaseRequest request = null) 
+        => (GetMemberResponse(listId, segmentId, request))?.Members;
 
     public async Task DeleteAsync(string listId, string segmentId, CancellationToken cancellationToken = default)
     {

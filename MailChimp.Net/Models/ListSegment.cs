@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -37,4 +37,5 @@ public class ListSegment
 
     [JsonProperty("options")]
     public SegmentOptions Options { get; set; }
+
 }
