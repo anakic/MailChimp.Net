@@ -48,6 +48,7 @@ public interface ICampaignLogic
     Task<Campaign> AddAsync(Campaign campaign, CancellationToken cancellationToken = default);
     Campaign Add(Campaign campaign);
 
+    Task<Campaign> UpdateAsync(string campaignId, Dictionary<string, object> campaign, CancellationToken cancellationToken = default);
     Task<Campaign> UpdateAsync(string campaignId, Campaign campaign, CancellationToken cancellationToken = default);
     Campaign Update(string campaignId, Campaign campaign);
 

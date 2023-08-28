@@ -61,7 +61,7 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
 
         return await response.Content.ReadAsAsync<Campaign>().ConfigureAwait(false);
     }
-    public async Task<Campaign> AddAsync(Campaign campaign, CancellationToken cancellationToken = default) 
+    public async Task<Campaign> AddAsync(Campaign campaign, CancellationToken cancellationToken = default)
         => await CreateAsync(campaign, cancellationToken).ConfigureAwait(false);
 
     public Campaign Add(Campaign campaign)
@@ -71,6 +71,15 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
     {
         using var client = CreateMailClient("campaigns/");
         var response = await client.PatchAsJsonAsync($"{campaignId}", campaign, cancellationToken).ConfigureAwait(false);
+        await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
+
+        return await response.Content.ReadAsAsync<Campaign>().ConfigureAwait(false);
+    }
+
+    public async Task<Campaign> UpdateAsync(string campaignId, Dictionary<string, object> data, CancellationToken cancellationToken = default)
+    {
+        using var client = CreateMailClient("campaigns/");
+        var response = await client.PatchAsJsonAsync($"{campaignId}", data, cancellationToken).ConfigureAwait(false);
         await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
 
         return await response.Content.ReadAsAsync<Campaign>().ConfigureAwait(false);
@@ -223,7 +232,7 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
     /// </exception>
     /// <exception cref="NotSupportedException"><paramref name="element" /> is not a constructor, method, property, event, type, or field. </exception>
     /// <exception cref="TypeLoadException">A custom attribute type cannot be loaded. </exception>
-    public async Task<IEnumerable<Campaign>> GetAllAsync(CampaignRequest request = null, CancellationToken cancellationToken = default) 
+    public async Task<IEnumerable<Campaign>> GetAllAsync(CampaignRequest request = null, CancellationToken cancellationToken = default)
         => (await GetResponseAsync(request).ConfigureAwait(false))?.Campaigns;
 
     public IEnumerable<Campaign> GetAll(CampaignRequest request = null)

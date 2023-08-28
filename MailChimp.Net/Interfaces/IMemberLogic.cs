@@ -197,4 +197,5 @@ public interface IMemberLogic
     Task<MemberResponse> GetResponseAsync(string listId, MemberRequest memberRequest = null, CancellationToken cancellationToken = default);
 
     string Hash(string emailAddress);
+    Task<Member> UpdateAsync(string listId, string memberId, Dictionary<string, object> values, CancellationToken cancellationToken = default);
 }
