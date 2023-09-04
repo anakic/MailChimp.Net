@@ -137,6 +137,14 @@ internal class MemberLogic : BaseLogic, IMemberLogic
         return await response.Content.ReadAsAsync<Member>().ConfigureAwait(false);
     }
 
+    public async Task<Member> AddAsync(string listId, Dictionary<string, object> values, CancellationToken cancellationToken = default)
+    {
+        using var client = CreateMailClient($"{BaseUrl}/");
+        var response = await client.PostAsJsonAsync($"{listId}/members", values, cancellationToken).ConfigureAwait(false);
+        await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
+        return await response.Content.ReadAsAsync<Member>().ConfigureAwait(false);
+    }
+
 
     /// <inheritdoc />
     public async Task AddEventAsync(string listId, string emailAddressOrHash, ListEvent list, CancellationToken cancellationToken = default)

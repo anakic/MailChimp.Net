@@ -32,6 +32,9 @@ public interface IMemberLogic
     /// </returns>
     Task<Member> AddOrUpdateAsync(string listId, Member member, IList<MarketingPermissionText> marketingPermissions = null, CancellationToken cancellationToken = default);
 
+    Task<Member> AddAsync(string listId, Dictionary<string, object> data, CancellationToken cancellationToken = default);
+    Task<Member> UpdateAsync(string listId, string memberId, Dictionary<string, object> data, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Search the account or a specific list for members that match the specified query terms.
     /// </summary>
@@ -197,5 +200,4 @@ public interface IMemberLogic
     Task<MemberResponse> GetResponseAsync(string listId, MemberRequest memberRequest = null, CancellationToken cancellationToken = default);
 
     string Hash(string emailAddress);
-    Task<Member> UpdateAsync(string listId, string memberId, Dictionary<string, object> values, CancellationToken cancellationToken = default);
 }

@@ -64,6 +64,9 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
     public async Task<Campaign> AddAsync(Campaign campaign, CancellationToken cancellationToken = default)
         => await CreateAsync(campaign, cancellationToken).ConfigureAwait(false);
 
+    public async Task<Campaign> AddAsync(Dictionary<string, object> data, CancellationToken cancellationToken = default)
+        => await CreateAsync(data, cancellationToken).ConfigureAwait(false);
+
     public Campaign Add(Campaign campaign)
         => Create(campaign);
 
@@ -139,6 +142,15 @@ internal class CampaignLogic : BaseLogic, ICampaignLogic
         var response = client.PostAsJsonAsync("", campaign, default).Result;
         response.EnsureSuccessMailChimpAsync().Wait();
         return response.Content.ReadAsAsync<Campaign>().Result;
+    }
+
+    private async Task<Campaign> CreateAsync(Dictionary<string, object> campaignData, CancellationToken cancellationToken = default)
+    {
+        using var client = CreateMailClient("campaigns");
+        var response = await client.PostAsJsonAsync("", campaignData, cancellationToken).ConfigureAwait(false);
+        await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
+
+        return await response.Content.ReadAsAsync<Campaign>().ConfigureAwait(false);
     }
 
     private async Task<Campaign> CreateAsync(Campaign campaign, CancellationToken cancellationToken = default)

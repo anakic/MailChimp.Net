@@ -28,6 +28,8 @@ public interface IListLogic
     /// <returns>
     /// The <see cref="Task"/>.
     /// </returns>
+    Task<List> AddAsync(Dictionary<string, object> list, CancellationToken cancellationToken = default);
+    Task<List> UpdateAsync(string id, Dictionary<string, object> data, CancellationToken cancellationToken = default);
     Task<List> AddOrUpdateAsync(List list, CancellationToken cancellationToken = default);
 
     /// <summary>

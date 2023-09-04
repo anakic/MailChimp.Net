@@ -62,6 +62,24 @@ internal class ListLogic : BaseLogic, IListLogic
         return await response.Content.ReadAsAsync<List>().ConfigureAwait(false);
     }
 
+    public async Task<List> UpdateAsync(string id, Dictionary<string, object> listData, CancellationToken cancellationToken = default)
+    {
+        using var client = CreateMailClient("lists/");
+        System.Net.Http.HttpResponseMessage response;
+        response = await client.PatchAsJsonAsync(id, listData, cancellationToken).ConfigureAwait(false);
+        await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
+        return await response.Content.ReadAsAsync<List>().ConfigureAwait(false);
+    }
+
+    public async Task<List> AddAsync(Dictionary<string, object> listData, CancellationToken cancellationToken = default)
+    {
+        using var client = CreateMailClient("lists/");
+        System.Net.Http.HttpResponseMessage response;
+        response = await client.PostAsJsonAsync(string.Empty, listData, cancellationToken).ConfigureAwait(false);
+        await response.EnsureSuccessMailChimpAsync().ConfigureAwait(false);
+        return await response.Content.ReadAsAsync<List>().ConfigureAwait(false);
+    }
+
     /// <summary>
     /// The delete async.
     /// </summary>
@@ -107,7 +125,7 @@ internal class ListLogic : BaseLogic, IListLogic
     /// Custom Mail Chimp Exception
     /// </exception>
     /// <exception cref="TypeLoadException">A custom attribute type cannot be loaded. </exception>
-    public async Task<IEnumerable<List>> GetAllAsync(ListRequest request = null, CancellationToken cancellationToken = default) 
+    public async Task<IEnumerable<List>> GetAllAsync(ListRequest request = null, CancellationToken cancellationToken = default)
         => (await GetResponseAsync(request, cancellationToken).ConfigureAwait(false))?.Lists;
 
     public IEnumerable<List> GetAll(ListRequest request = null)
@@ -135,7 +153,7 @@ internal class ListLogic : BaseLogic, IListLogic
     /// <exception cref="TypeLoadException">A custom attribute type cannot be loaded. </exception>
     public async Task<ListResponse> GetResponseAsync(ListRequest request = null, CancellationToken cancellationToken = default)
     {
-        request ??=  new ListRequest
+        request ??= new ListRequest
         {
             Limit = _limit
         };
